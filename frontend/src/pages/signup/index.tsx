@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useContext, useState } from "react";
+import { toast } from "react-toastify";
 import logo from "../../../public/logo.svg";
 import styles from "../../../styles/home.module.scss";
 import { Button } from "../../components/ui/Button";
@@ -21,7 +22,7 @@ export default function SignUp() {
         event.preventDefault();
 
         if (name === "" || email === "" || password === "") {
-            alert("Missing fields");
+            toast.warning("Missing fields");
             return;
         }
         setLoading(true);

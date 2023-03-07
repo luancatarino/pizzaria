@@ -1,7 +1,8 @@
 import { api } from "@/services/apiClient";
 import Router from "next/router";
-import { destroyCookie, setCookie } from "nookies";
-import { createContext, ReactNode, useState } from "react";
+import { destroyCookie, parseCookies, setCookie } from "nookies";
+import { createContext, ReactNode, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 type UserProps = {
     id: string;
@@ -47,6 +48,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<UserProps | any>();
     const isAuthenticated = !!user!;
 
+    useEffect(() => {
+        const { "@pizzeria.token": token } = parseCookies();
+
+        if (token) {
+            api.get("/userinfo")
+                .then((response) => {
+                    const { id, name, email } = response.data;
+
+                    setUser({
+                        id,
+                        name,
+                        email,
+                    });
+                })
+                .catch(() => {
+                    signOut();
+                });
+        }
+    }, []);
+
     const signIn = async ({ email, password }: SignInProps) => {
         try {
             const response = await api.post("/login", {
@@ -70,8 +91,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
             //Passar o token para as próximas requisições
             api.defaults.headers["Authorization"] = `Bearer ${token}`;
 
+            toast.success("Login successful");
+
             Router.push("/dashboard");
         } catch (error) {
+            toast.error("Login error");
             console.log("An error occurred", error);
         }
     };
@@ -84,8 +108,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 password,
             });
 
+            toast.success("Account created");
+
             Router.push("/");
         } catch (error) {
+            toast.error("Create account error");
             console.log("An error occurred", error);
         }
     };

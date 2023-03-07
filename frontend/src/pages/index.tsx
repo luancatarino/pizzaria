@@ -4,9 +4,12 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useContext, useState } from "react";
+import { toast } from "react-toastify";
 import logo from "../../public/logo.svg";
 import styles from "../../styles/home.module.scss";
 import { Input } from "../components/ui/Input";
+import { GetServerSideProps } from "next";
+import { canSSRGuest } from "@/utils/canSSRGuest";
 
 export default function Home() {
     const [email, setEmail] = useState("");
@@ -19,11 +22,12 @@ export default function Home() {
     const handleLogin = async (event: FormEvent) => {
         event.preventDefault();
 
-        if(email == "" || password === "") {
-            return
+        if (email == "" || password === "") {
+            toast.warning("Missing fields");
+            return;
         }
 
-        setLoading(true)
+        setLoading(true);
 
         let data = {
             email: email,
@@ -32,7 +36,7 @@ export default function Home() {
 
         await signIn(data);
 
-        setLoading(false)
+        setLoading(false);
     };
 
     return (
@@ -63,3 +67,11 @@ export default function Home() {
         </>
     );
 }
+
+export const getServerSideProps = canSSRGuest(async (context) => {
+    return {
+        props: {
+            
+        }
+    }
+})
